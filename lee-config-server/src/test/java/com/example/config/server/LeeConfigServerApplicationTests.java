@@ -1,10 +1,10 @@
-package com.example.config;
+package com.example.config.server;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class LeeConfigApplicationTests {
+class LeeConfigServerApplicationTests {
 
 	@Test
 	void contextLoads() {
