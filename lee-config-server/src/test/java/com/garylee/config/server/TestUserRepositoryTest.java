@@ -1,6 +1,6 @@
 package com.garylee.config.server;
 
-import com.garylee.config.server.domain.test.TestUser;
+import com.garylee.config.server.model.test.TestUser;
 import com.garylee.config.server.repository.test.TestUserRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;

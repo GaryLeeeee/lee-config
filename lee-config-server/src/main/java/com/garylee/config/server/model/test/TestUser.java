@@ -1,4 +1,4 @@
-package com.garylee.config.server.domain.test;
+package com.garylee.config.server.model.test;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

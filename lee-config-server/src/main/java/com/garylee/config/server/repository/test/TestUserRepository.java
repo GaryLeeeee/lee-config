@@ -1,6 +1,6 @@
 package com.garylee.config.server.repository.test;
 
-import com.garylee.config.server.domain.test.TestUser;
+import com.garylee.config.server.model.test.TestUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
