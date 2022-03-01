@@ -4,8 +4,12 @@ import com.garylee.config.server.model.LeeObjectConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -36,5 +40,24 @@ public class LeeObjectConfigRepository {
      */
     public List<LeeObjectConfig> queryAll() {
         return mongoTemplate.findAll(LeeObjectConfig.class);
+    }
+
+    /**
+     * 更新
+     *
+     * @param config
+     */
+    public void update(LeeObjectConfig config) {
+        mongoTemplate.findAndModify(
+                Query.query(Criteria.where(LeeObjectConfig.Fields.key).is(config.getKey())),
+                Update.update(LeeObjectConfig.Fields.value, config.getValue())
+                        .set(LeeObjectConfig.Fields.description, config.getDescription())
+                        .inc(LeeObjectConfig.Fields.version, 1)
+                        .set(LeeObjectConfig.Fields.operatorUid, config.getOperatorUid())
+                        .set(LeeObjectConfig.Fields.operatorName, config.getOperatorName())
+                        .set(LeeObjectConfig.Fields.updateTime, new Date()),
+                //FindAndModifyOptions.options().returnNew(true),
+                LeeObjectConfig.class
+        );
     }
 }
