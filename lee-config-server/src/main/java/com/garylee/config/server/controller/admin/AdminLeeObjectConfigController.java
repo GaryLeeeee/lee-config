@@ -1,5 +1,7 @@
 package com.garylee.config.server.controller.admin;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.garylee.config.api.common.resp.LeeApiResp;
 import com.garylee.config.server.model.LeeObjectConfig;
 import com.garylee.config.server.repository.LeeObjectConfigHistoryRepository;
@@ -26,6 +28,19 @@ public class AdminLeeObjectConfigController {
     private LeeObjectConfigRepository leeObjectConfigRepository;
     @Autowired
     private LeeObjectConfigHistoryRepository leeObjectConfigHistoryRepository;
+
+    @GetMapping("/queryAllConfigsByPage")
+    public LeeApiResp<IPage<LeeObjectConfig>> queryAllConfigsByPage(Page<LeeObjectConfig> page) {
+        List<LeeObjectConfig> allConfigs = leeObjectConfigRepository.queryAll();
+
+        //分页
+        page.setCurrent(page.getCurrent());
+        page.setPages((allConfigs.size() - 1) / page.getSize() + 1);
+        page.setRecords(allConfigs);
+        page.setTotal(allConfigs.size());
+
+        return LeeApiResp.success(page);
+    }
 
     /**
      * 查询所有配置
