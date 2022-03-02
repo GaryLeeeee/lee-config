@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.garylee.config.api.common.resp.LeeApiResp;
 import com.garylee.config.server.model.LeeObjectConfig;
+import com.garylee.config.server.model.LeeObjectConfigHistory;
 import com.garylee.config.server.repository.LeeObjectConfigHistoryRepository;
 import com.garylee.config.server.repository.LeeObjectConfigRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author: GaryLeeeee
@@ -33,10 +35,17 @@ public class AdminLeeObjectConfigController {
     public LeeApiResp<IPage<LeeObjectConfig>> queryAllConfigsByPage(Page<LeeObjectConfig> page) {
         List<LeeObjectConfig> allConfigs = leeObjectConfigRepository.queryAll();
 
+        //todo 物理分页，后续可以优化
+        List<LeeObjectConfig> resultConfigs = allConfigs
+                .stream()
+                .skip((page.getCurrent() - 1) * page.getSize())
+                .limit(page.getSize())
+                .collect(Collectors.toList());
+
         //分页
         page.setCurrent(page.getCurrent());
         page.setPages((allConfigs.size() - 1) / page.getSize() + 1);
-        page.setRecords(allConfigs);
+        page.setRecords(resultConfigs);
         page.setTotal(allConfigs.size());
 
         return LeeApiResp.success(page);
@@ -72,6 +81,48 @@ public class AdminLeeObjectConfigController {
     @PostMapping("/updateConfig")
     public LeeApiResp<Boolean> updateConfig(LeeObjectConfig config) {
         leeObjectConfigRepository.update(config);
+        return LeeApiResp.success(true);
+    }
+
+    /**
+     * 分页查询历史配置(用来回滚等)
+     *
+     * @param key
+     * @param page
+     * @return
+     */
+    @GetMapping("/queryConfigHistories")
+    public LeeApiResp<IPage<LeeObjectConfigHistory>> queryConfigHistories(String key,
+                                                                          Page<LeeObjectConfigHistory> page) {
+        List<LeeObjectConfigHistory> allConfigHistories = leeObjectConfigHistoryRepository.queryConfigHistoriesByKey(key);
+
+        //todo 物理分页，后续可以优化
+        List<LeeObjectConfigHistory> resultConfigHistories = allConfigHistories
+                .stream()
+                .skip((page.getCurrent() - 1) * page.getSize())
+                .limit(page.getSize())
+                .collect(Collectors.toList());
+
+        //分页
+        page.setCurrent(page.getCurrent());
+        page.setPages((allConfigHistories.size() - 1) / page.getSize() + 1);
+        page.setRecords(resultConfigHistories);
+        page.setTotal(allConfigHistories.size());
+
+        return LeeApiResp.success(page);
+    }
+
+    /**
+     * 回滚配置
+     *
+     * @param key
+     * @param configHistoryId 回滚目标id(也许可以用version)
+     * @return
+     */
+    @PostMapping("/rollback")
+    public LeeApiResp<Boolean> rollback(String key,
+                                        String configHistoryId) {
+        //todo 待实现
         return LeeApiResp.success(true);
     }
 
