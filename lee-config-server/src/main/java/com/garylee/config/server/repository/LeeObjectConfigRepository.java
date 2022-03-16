@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -23,6 +24,19 @@ public class LeeObjectConfigRepository {
     @Autowired
     private MongoTemplate mongoTemplate;
 
+    public LeeObjectConfig queryByKey(String key) {
+        List<LeeObjectConfig> list = mongoTemplate.find(
+                Query.query(Criteria.where(LeeObjectConfig.Fields.key).is(key)),
+                LeeObjectConfig.class
+        );
+
+        if (CollectionUtils.isEmpty(list)) {
+            return null;
+        }
+
+        return list.get(0);
+    }
+
     /**
      * 新增
      *
@@ -30,6 +44,9 @@ public class LeeObjectConfigRepository {
      * @return
      */
     public LeeObjectConfig insert(LeeObjectConfig config) {
+        Date now = new Date();
+        config.setCreateTime(now);
+        config.setUpdateTime(now);
         return mongoTemplate.insert(config);
     }
 
@@ -47,8 +64,8 @@ public class LeeObjectConfigRepository {
      *
      * @param config
      */
-    public void update(LeeObjectConfig config) {
-        mongoTemplate.findAndModify(
+    public LeeObjectConfig update(LeeObjectConfig config) {
+        return mongoTemplate.findAndModify(
                 Query.query(Criteria.where(LeeObjectConfig.Fields.key).is(config.getKey())),
                 Update.update(LeeObjectConfig.Fields.value, config.getValue())
                         .set(LeeObjectConfig.Fields.description, config.getDescription())
@@ -57,6 +74,19 @@ public class LeeObjectConfigRepository {
                         .set(LeeObjectConfig.Fields.operatorName, config.getOperatorName())
                         .set(LeeObjectConfig.Fields.updateTime, new Date()),
                 //FindAndModifyOptions.options().returnNew(true),
+                LeeObjectConfig.class
+        );
+    }
+
+    /**
+     * 删除
+     *
+     * @param id
+     * @return
+     */
+    public LeeObjectConfig delete(String id) {
+        return mongoTemplate.findAndRemove(
+                Query.query(Criteria.where(LeeObjectConfig.Fields.id).is(id)),
                 LeeObjectConfig.class
         );
     }

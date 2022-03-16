@@ -1,20 +1,20 @@
 package com.garylee.config.server.controller.admin;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.garylee.config.api.common.resp.LeeApiResp;
 import com.garylee.config.server.model.LeeObjectConfig;
 import com.garylee.config.server.model.LeeObjectConfigHistory;
 import com.garylee.config.server.repository.LeeObjectConfigHistoryRepository;
 import com.garylee.config.server.repository.LeeObjectConfigRepository;
+import com.garylee.config.server.service.LeeObjectConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -30,6 +30,8 @@ public class AdminLeeObjectConfigController {
     private LeeObjectConfigRepository leeObjectConfigRepository;
     @Autowired
     private LeeObjectConfigHistoryRepository leeObjectConfigHistoryRepository;
+    @Autowired
+    private LeeObjectConfigService leeObjectConfigService;
 
     @GetMapping("/queryAllConfigsByPage")
     public LeeApiResp<IPage<LeeObjectConfig>> queryAllConfigsByPage(Page<LeeObjectConfig> page) {
@@ -62,26 +64,32 @@ public class AdminLeeObjectConfigController {
     }
 
     /**
-     * 新增配置
+     * 新增/更新配置
      *
      * @param config
      * @return
      */
-    @PostMapping("/addConfig")
-    public LeeApiResp<LeeObjectConfig> addConfig(LeeObjectConfig config) {
-        return LeeApiResp.success(leeObjectConfigRepository.insert(config));
+    @PostMapping("/addOrUpdateConfig")
+    public LeeApiResp<LeeObjectConfig> addOrUpdateConfig(@RequestBody LeeObjectConfig config) {
+        if (StringUtils.isBlank(config.getId())) {
+            config.setId(UUID.randomUUID().toString());
+            config.setVersion(1L);
+            config.setFrequency(0L);
+            return LeeApiResp.success(leeObjectConfigRepository.insert(config));
+        } else {
+            return LeeApiResp.success(leeObjectConfigService.updateConfig(config));
+        }
     }
 
     /**
-     * 更新配置
+     * 删除配置
      *
-     * @param config
+     * @param id 配置唯一id
      * @return
      */
-    @PostMapping("/updateConfig")
-    public LeeApiResp<Boolean> updateConfig(LeeObjectConfig config) {
-        leeObjectConfigRepository.update(config);
-        return LeeApiResp.success(true);
+    @PostMapping("/deleteConfig")
+    public LeeApiResp<LeeObjectConfig> deleteConfig(String id) {
+        return LeeApiResp.success(leeObjectConfigRepository.delete(id));
     }
 
     /**
